@@ -1,0 +1,137 @@
+class Solution {
+public:
+    vector<int> sortArray(vector<int>& nums) {
+        if (nums.size() <= 1) {
+            return nums;
+        }
+        
+        //quickSort(nums, 0, nums.size() - 1);
+        //mergeSort(nums, 0, nums.size() - 1);
+        heapSort(nums);
+
+        return nums;
+    }
+
+private:
+    void heapSort(vector<int>& arr)
+    {
+        int n = arr.size();
+        for (int i = n / 2 - 1; i >= 0; --i)
+        {
+            heapify(arr, n, i);
+        }
+
+        for (int i = n - 1; i > 0; i--)
+        {
+            std::swap(arr[0], arr[i]);
+            heapify(arr, i, 0);
+        }
+    }
+
+    void heapify(vector<int>& arr, int n, int i)
+    {
+        int smallestIndex = i;
+        int leftC = 2*i+1;
+        int rightC = 2*i+2;
+
+        if (leftC < n && arr[leftC] > arr[smallestIndex]) smallestIndex = leftC;
+        if (rightC < n && arr[rightC] > arr[smallestIndex]) smallestIndex = rightC;
+
+        if (smallestIndex != i)
+        {
+            std::swap(arr[i], arr[smallestIndex]);
+            heapify(arr, n, smallestIndex);
+        }
+    }
+
+    int partition(vector<int>& arr, int left, int right)
+    {
+        int pivotIndex = left + rand() % (right - left + 1);
+        swap(arr[pivotIndex], arr[right]);
+
+        int pivot = arr[right];
+        int i = left - 1;
+
+        for (int j = left; j <= right - 1; ++j)
+        {
+            if (arr[j] <= pivot)
+            {
+                ++i;
+                std::swap(arr[i], arr[j]);
+            }
+        }
+
+        std::swap(arr[i+1], arr[right]);
+        return i + 1;
+    }
+
+    void quickSort(vector<int>& arr, int left, int right)
+    {
+        if (left < right)
+        {
+            int pivot = partition(arr, left, right);
+            quickSort(arr, left, pivot - 1);
+            quickSort(arr, pivot + 1, right);
+        }
+
+    }
+
+    void mergeSort(vector<int>& arr, int left, int right)
+    {
+        if (left >= right) return;
+
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+
+    void merge(vector<int>& arr, int left, int mid, int right)
+    {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+
+        vector<int> L(n1), R(n2);
+
+        int i = 0;
+        for (; i < n1; ++i)    L[i] = arr[left + i];
+
+        int j = 0;
+        for (; j < n2; ++j)    R[j] = arr[mid + 1 + j];
+
+        i = 0;
+        j = 0;
+        int k = left;
+
+        while (i < n1 && j < n2)
+        {
+            if (L[i] <= R[j])
+            {
+                arr[k] = L[i];
+                ++i;
+            }
+            else // (L[i] > R[j])
+            {
+                arr[k] = R[j];
+                ++j;
+            }
+            ++k;
+        }
+
+        while (i < n1)
+        {
+            arr[k] = L[i];
+            ++k;
+            ++i;
+        }
+
+        while (j < n2)
+        {
+            arr[k] = R[j];
+            ++k;
+            ++j;
+        }
+    }
+
+
+};
