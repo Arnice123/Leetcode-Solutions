@@ -1,0 +1,171 @@
+class MyHashSet {
+public:
+
+    MyHashSet(int initialCapacity = 16, double loadFactor = 0.75) 
+        : capacity(initialCapacity), size(0), loadFactorThreshold(loadFactor) {
+        arr = new int[capacity];
+        std::fill(arr, arr + capacity, -1);
+    }
+
+    MyHashSet(const MyHashSet& other) 
+        : capacity(other.capacity), size(other.size), loadFactorThreshold(other.loadFactorThreshold) {
+        arr = new int[capacity];
+        std::copy(other.arr, other.arr + capacity, arr);
+    }
+    
+    MyHashSet(MyHashSet&& other) noexcept 
+        : arr(other.arr), capacity(other.capacity), 
+          size(other.size), loadFactorThreshold(other.loadFactorThreshold) {
+        other.arr = nullptr;
+        other.capacity = 0;
+        other.size = 0;
+    }
+    
+    MyHashSet& operator=(const MyHashSet& other) {
+        if (this != &other) {
+            delete[] arr;
+            
+            capacity = other.capacity;
+            size = other.size;
+            loadFactorThreshold = other.loadFactorThreshold;
+            
+            arr = new int[capacity];
+            std::copy(other.arr, other.arr + capacity, arr);
+        }
+        return *this;
+    }
+    
+    MyHashSet& operator=(MyHashSet&& other) noexcept {
+        if (this != &other) {
+            delete[] arr;
+            
+            arr = other.arr;
+            capacity = other.capacity;
+            size = other.size;
+            loadFactorThreshold = other.loadFactorThreshold;
+            
+            other.arr = nullptr;
+            other.capacity = 0;
+            other.size = 0;
+        }
+        return *this;
+    }
+    
+    void add(int key) {
+       if (static_cast<double>(size) / capacity >= loadFactorThreshold) resize();
+
+       int indx = getIndex(key);
+       int orignalIndx = indx;
+
+       do {
+            if (arr[indx] == -1 || arr[indx] == -2)
+            {
+                arr[indx] = key;
+                ++size;
+                return;
+            }
+
+            if (arr[indx] == key)
+            {
+                return;
+            }
+
+            indx = (indx + 1) % capacity;
+       } while (indx != orignalIndx);
+    }
+    
+    void remove(int key) {
+       int indx = getIndex(key);
+       int orignalIndx = indx;
+
+       do {
+            if (arr[indx] == -1)
+            {
+                return;
+            }
+
+            if (arr[indx] == key)
+            {
+                arr[indx] = -2;
+                --size;
+                return;
+            }
+
+            indx = (indx + 1) % capacity;
+       } while (indx != orignalIndx);
+    }
+    
+    bool contains(int key) const {
+        int indx = getIndex(key);
+       int orignalIndx = indx;
+
+       do {
+            if (arr[indx] == -1)
+            {
+                return false;
+            }
+
+            if (arr[indx] == key)
+            {
+                return true;
+            }
+
+            indx = (indx + 1) % capacity;
+       } while (indx != orignalIndx);
+
+       return false;
+    }
+    
+    // Get current number of elements
+    int getSize() const {
+        return size;
+    }
+    
+    // Check if hash set is empty
+    bool isEmpty() const {
+        return size == 0;
+    }
+    
+    // Destructor
+    ~MyHashSet() {
+        delete[] arr;
+    }
+
+private:
+    int* arr;
+    int capacity;
+    int size;
+    double loadFactorThreshold;
+
+    int getIndex(int key) const {
+        
+        return static_cast<int>((key * 2654435761u) % capacity);
+    }
+    
+    
+    void resize() {
+        int oldCapacity = capacity;
+        capacity *= 2;
+
+        int* newArr = new int[capacity];
+        std::fill(newArr, newArr + capacity, -1);
+
+        for (int i = 0; i < oldCapacity; ++i)
+        {
+            if (arr[i] > 0)
+            {
+                int indx = getIndex(arr[i]);
+
+                while (newArr[indx] != -1)
+                {
+                    indx = (indx + 1) % capacity;
+                }
+
+                newArr[indx] = arr[i];
+            }
+        }
+
+        delete[] arr;
+        arr = newArr;
+    }
+};
